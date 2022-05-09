@@ -17,7 +17,7 @@ import com.mobile.phonelogs.ui.utils.redirectToSettingsScreen
 import pub.devrel.easypermissions.EasyPermissions
 
 @SuppressLint("CustomSplashScreen")
-class SplashActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
+class SplashActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks , EasyPermissions.RationaleCallbacks{
 
     private var permsContacts = arrayOf(Manifest.permission.READ_CONTACTS)
     private var permsCallLogs = arrayOf(Manifest.permission.READ_CALL_LOG)
@@ -78,5 +78,12 @@ class SplashActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         requestPermission()
+    }
+
+    override fun onRationaleAccepted(requestCode: Int) {
+    }
+
+    override fun onRationaleDenied(requestCode: Int) {
+        finish()
     }
 }
