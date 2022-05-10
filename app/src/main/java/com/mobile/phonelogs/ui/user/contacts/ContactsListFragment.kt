@@ -31,6 +31,11 @@ class ContactsListFragment : BaseFragment() {
                 if (contacts.size != 0) {
                     adapter.clear()
                     adapter.addAll(contacts)
+                    contactsRecycler.visibility = View.VISIBLE
+                    noDataFound.visibility = View.GONE
+                } else {
+                    contactsRecycler.visibility = View.GONE
+                    noDataFound.visibility = View.VISIBLE
                 }
             }
         }

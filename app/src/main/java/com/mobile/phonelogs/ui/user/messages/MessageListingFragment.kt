@@ -4,9 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.mobile.phonelogs.R
 import com.mobile.phonelogs.base.fragment.BaseFragment
 import com.mobile.phonelogs.base.viewmodels.ContactsViewModel
 import com.mobile.phonelogs.data.Constants.MESSAGES
@@ -36,6 +34,11 @@ class MessageListingFragment : BaseFragment() {
                 if (messages.size != 0) {
                     adapter.clear()
                     adapter.addAll(messages)
+                    noDataFound.visibility = View.GONE
+                    messagesRecycler.visibility = View.VISIBLE
+                } else {
+                    noDataFound.visibility = View.VISIBLE
+                    messagesRecycler.visibility = View.GONE
                 }
             }
         }

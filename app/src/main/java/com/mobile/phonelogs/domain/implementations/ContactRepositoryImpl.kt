@@ -78,24 +78,28 @@ class ContactRepositoryImpl(private var resolver: ContentResolver) : ContactsRep
                 val idxMimeType: Int = getColumnIndex(ContactsContract.Data.MIMETYPE)
                 val idxData1: Int = getColumnIndex(ContactsContract.Data.DATA1)
 
-                while (!isAfterLast) {
-                    val id: Long = getLong(idxId)
-                    var contact: Contact? = contacts.get(id, null)
-                    if (contact == null) {
-                        contact = Contact()
-                        contact.id = id
-                        ContactDataMapper.mapDisplayName(this, contact, idxDisplayNamePrimary)
-                        ContactDataMapper.mapPhoto(this, contact, idxPhoto)
-                        contacts.put(id, contact)
-                        contactsList.add(contact)
-                    }
-                    val mimetype: String = getString(idxMimeType)
-                    when (mimetype) {
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
-                            ContactDataMapper.mapPhoneNumber(this, contact, idxData1)
+                if (isAfterLast) {
+                    emit(ResultData.success(arrayListOf()))
+                } else {
+                    while (!isAfterLast) {
+                        val id: Long = getLong(idxId)
+                        var contact: Contact? = contacts.get(id, null)
+                        if (contact == null) {
+                            contact = Contact()
+                            contact.id = id
+                            ContactDataMapper.mapDisplayName(this, contact, idxDisplayNamePrimary)
+                            ContactDataMapper.mapPhoto(this, contact, idxPhoto)
+                            contacts.put(id, contact)
+                            contactsList.add(contact)
                         }
+                        val mimetype: String = getString(idxMimeType)
+                        when (mimetype) {
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
+                                ContactDataMapper.mapPhoneNumber(this, contact, idxData1)
+                            }
+                        }
+                        moveToNext()
                     }
-                    moveToNext()
                 }
                 emit(ResultData.success(contactsList))
                 close()
@@ -115,29 +119,33 @@ class ContactRepositoryImpl(private var resolver: ContentResolver) : ContactsRep
                 val type: Int = managedCursor.getColumnIndex(CallLog.Calls.TYPE)
                 val date: Int = managedCursor.getColumnIndex(CallLog.Calls.DATE)
 
-                while (managedCursor.moveToNext()) {
-                    val name: String = managedCursor.getString(name) ?: ""
-                    val phNumber: String = managedCursor.getString(number)
-                    val callType: String = managedCursor.getString(type)
-                    val callTimeStamp: Long = java.lang.Long.valueOf(managedCursor.getString(date))
-                    var viewType = 0
-                    var dir: String? = null
-                    when (callType.toInt()) {
-                        CallLog.Calls.INCOMING_TYPE -> {
-                            viewType = 0
-                            dir = "INCOMING"
+                if (managedCursor.isAfterLast) {
+                    emit(ResultData.success(arrayListOf<PhoneCallLog>().apply { arrayListOf<PhoneCallLog>() }))
+                } else {
+                    while (managedCursor.moveToNext()) {
+                        val name: String = managedCursor.getString(name) ?: ""
+                        val phNumber: String = managedCursor.getString(number)
+                        val callType: String = managedCursor.getString(type)
+                        val callTimeStamp: Long = java.lang.Long.valueOf(managedCursor.getString(date))
+                        var viewType = 0
+                        var dir: String? = null
+                        when (callType.toInt()) {
+                            CallLog.Calls.INCOMING_TYPE -> {
+                                viewType = 0
+                                dir = "INCOMING"
+                            }
+                            CallLog.Calls.OUTGOING_TYPE -> {
+                                viewType = 1
+                                dir = "OUTGOING"
+                            }
+                            CallLog.Calls.MISSED_TYPE -> {
+                                viewType = 2
+                                dir = "MISSED"
+                            }
                         }
-                        CallLog.Calls.OUTGOING_TYPE -> {
-                            viewType = 1
-                            dir = "OUTGOING"
-                        }
-                        CallLog.Calls.MISSED_TYPE -> {
-                            viewType = 2
-                            dir = "MISSED"
-                        }
+                        list.add(PhoneCallLog(name, viewType, 0, dir, phNumber, callTimeStamp, dir))
+                        emit(ResultData.success(arrayListOf<PhoneCallLog>().apply { addAll(list) }))
                     }
-                    list.add(PhoneCallLog(name, viewType, 0, dir, phNumber, callTimeStamp, dir))
-                    emit(ResultData.success(arrayListOf<PhoneCallLog>().apply { addAll(list) }))
                 }
                 close()
             }
@@ -150,20 +158,24 @@ class ContactRepositoryImpl(private var resolver: ContentResolver) : ContactsRep
             var objSms = Message()
             val cursor = createCursorForMessages(resolver)
             val totalSMS = cursor!!.count
-            if (cursor.moveToFirst()) {
-                for (i in 0 until totalSMS) {
-                    objSms = Message()
-                    objSms.address = (cursor.getString(cursor.getColumnIndexOrThrow("address")))
-                    if (objSms.address?.matches(Regex("\\+?1?\\s*\\(?-*\\.*(\\d{3})\\)?\\.*-*\\s*(\\d{3})\\.*-*\\s*(\\d{4})\$")) == true) {
-                        objSms.readState = getContactName(objSms.address)
-                    } else {
-                        objSms.readState = objSms.address
+            if (cursor.isAfterLast) {
+                emit(ResultData.success(arrayListOf()))
+            } else {
+                if (cursor.moveToFirst()) {
+                    for (i in 0 until totalSMS) {
+                        objSms = Message()
+                        objSms.address = (cursor.getString(cursor.getColumnIndexOrThrow("address")))
+                        if (objSms.address?.matches(Regex("\\+?1?\\s*\\(?-*\\.*(\\d{3})\\)?\\.*-*\\s*(\\d{3})\\.*-*\\s*(\\d{4})\$")) == true) {
+                            objSms.readState = getContactName(objSms.address)
+                        } else {
+                            objSms.readState = objSms.address
+                        }
+                        objSms.messsage = (cursor.getString(cursor.getColumnIndexOrThrow("body")))
+                        objSms.time = (cursor.getString(cursor.getColumnIndexOrThrow("date")))
+                        lstSms.add(objSms)
+                        cursor.moveToNext()
+                        emit(ResultData.success(lstSms))
                     }
-                    objSms.messsage = (cursor.getString(cursor.getColumnIndexOrThrow("body")))
-                    objSms.time = (cursor.getString(cursor.getColumnIndexOrThrow("date")))
-                    lstSms.add(objSms)
-                    cursor.moveToNext()
-                    emit(ResultData.success(lstSms))
                 }
             }
             cursor.close()

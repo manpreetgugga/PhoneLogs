@@ -36,6 +36,11 @@ class OutGoingCallLogsFragment : BaseFragment() {
                             it.viewType == 1
                         })
                     }
+                    contactLogsRecycler.visibility = View.VISIBLE
+                    noDataFound.visibility = View.GONE
+                } else {
+                    contactLogsRecycler.visibility = View.GONE
+                    noDataFound.visibility = View.VISIBLE
                 }
             }
         }

@@ -37,6 +37,11 @@ class MissCallLogsFragment : BaseFragment() {
                             it.viewType == 2
                         })
                     }
+                    contactLogsRecycler.visibility = View.VISIBLE
+                    noDataFound.visibility = View.GONE
+                } else {
+                    contactLogsRecycler.visibility = View.GONE
+                    noDataFound.visibility = View.VISIBLE
                 }
             }
         }
