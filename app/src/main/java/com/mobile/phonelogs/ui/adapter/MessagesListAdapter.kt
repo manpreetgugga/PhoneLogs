@@ -8,8 +8,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mobile.phonelogs.databinding.ItemLayoutMessageBinding
-import com.mobile.phonelogs.domain.entities.Contact
 import com.mobile.phonelogs.domain.entities.Message
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MessagesListAdapter(var context: Context, var messages: ArrayList<Message>) : RecyclerView.Adapter<MessagesListAdapter.MessageViewHolder>() {
 
@@ -27,9 +28,10 @@ class MessagesListAdapter(var context: Context, var messages: ArrayList<Message>
                 messageText.text = Html.fromHtml(messsage)
                 messageText.movementMethod = LinkMovementMethod.getInstance()
                 time?.let {
-                    val time = DateUtils.formatDateTime(context, it.toLong(), DateUtils.FORMAT_SHOW_TIME)
-                    val date = DateUtils.formatDateTime(context, it.toLong(), DateUtils.FORMAT_SHOW_DATE)
-                    messageTime.text = "$time $date"
+                    // constructor
+                    // constructor
+                    val date = Date(it.toLong())
+                    messageTime.text = "$date"
                 }
             }
         }
