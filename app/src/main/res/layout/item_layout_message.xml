@@ -33,11 +33,13 @@
                 android:textSize="16sp" />
 
             <TextView
+                android:lineSpacingExtra="2dp"
                 android:id="@+id/messageText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/messageName"
                 android:layout_alignParentStart="true"
+                android:autoLink="web"
                 android:layout_alignParentEnd="true"
                 android:layout_marginBottom="@dimen/dimen_8"
                 android:ellipsize="end"

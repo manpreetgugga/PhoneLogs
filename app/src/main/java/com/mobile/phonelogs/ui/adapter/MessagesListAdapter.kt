@@ -1,7 +1,9 @@
 package com.mobile.phonelogs.ui.adapter
 
 import android.content.Context
+import android.text.Html
 import android.text.format.DateUtils
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +24,8 @@ class MessagesListAdapter(var context: Context, var messages: ArrayList<Message>
         holder.binding.apply {
             messages[position].apply {
                 messageName.text = readState ?: "Unknown"
-                messageText.text = messsage
+                messageText.text = Html.fromHtml(messsage)
+                messageText.movementMethod = LinkMovementMethod.getInstance()
                 time?.let {
                     val time = DateUtils.formatDateTime(context, it.toLong(), DateUtils.FORMAT_SHOW_TIME)
                     val date = DateUtils.formatDateTime(context, it.toLong(), DateUtils.FORMAT_SHOW_DATE)
